@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Infrastructure.Objects;
+using System.Text.Json.Serialization;
 
 namespace TestProjectNunit.Requests
 {
-    public record class UserDTO
-    (string password,
-    string email,
-    string phone,
-    string nickName
-    );
+    public record UserDTO
+    (
+    string Password,
+    string Email,
+    string Phone,
+    string NickName,    
+    string Method
+    ) : BaseRequest(Method);    
 }
