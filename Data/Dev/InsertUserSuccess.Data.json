@@ -1,0 +1,9 @@
+﻿{
+	"message": "Usuario Cadastrado com sucesso!",
+	"UserDTO": {
+		"Password": "your_password",
+		"Email": "your_email@example.com",
+		"Phone": "123-456-7890",
+		"NickName": "your_nickname"		
+	}
+}

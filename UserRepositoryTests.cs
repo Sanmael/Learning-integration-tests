@@ -1,68 +1,63 @@
+using Infrastructure.EntitiesObjects;
+using Infrastructure.EntitiesObjects.Cenarios;
+using Infrastructure.EntitiesObjects.Requests;
+using Infrastructure.EntitiesObjects.Responses;
+using Infrastructure.MountEntities;
 using Infrastructure.Objects;
 using Infrastructure.Utils;
 using Newtonsoft.Json;
-using System.Net.Http.Json;
-using TestProjectNunit.Objects;
-using TestProjectNunit.Requests;
-using TestProjectNunit.Responses;
-using static System.Net.WebRequestMethods;
 
-namespace TestProjectNunit
+namespace UserIntegrationTests
 {
     public class UserRepositoryTests
     {
-
-        private FakeData<InsertUserResponse> _insertUserResponseData;
-        private FakeData<InsertUserErrorResponse> _insertUserErrorExistinEmailResponseData;
-        private FakeData<InsertUserErrorResponse> _insertUserErrorExistingPhoneResponseData;
-        private readonly RequestProcessor _requestProcessor = new RequestProcessor("https://localhost:7049");
+        private const int FirstItemInList = 1;
+        private FakeData<UserResponse> _insertUserResponseData;                
+        private FakeData<UserResponse> _insertUserResponseInsertUserErrorWhenExistEmailData;                
+        private FakeData<UserResponse> _insertUserResponseInsertUserErrorWhenExistPhoneData;                
+        private readonly RequestProcessor _requestProcessor = new RequestProcessor(EndPoints.UserApiUrl);
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
-            _insertUserResponseData = new FakeData<InsertUserResponse>(UserScenarios.InsertUserSuccess);
-            _insertUserErrorExistinEmailResponseData = new FakeData<InsertUserErrorResponse>(UserScenarios.InsertUserErrorWhenExistEmail);
-            _insertUserErrorExistingPhoneResponseData = new FakeData<InsertUserErrorResponse>(UserScenarios.InsertUserErrorWhenExistPhone);
+            _insertUserResponseData = new FakeData<UserResponse>(UserCenarios.InsertUserSuccess);
+            _insertUserResponseInsertUserErrorWhenExistEmailData = new FakeData<UserResponse>(UserCenarios.InsertUserErrorWhenExistEmail);
+            _insertUserResponseInsertUserErrorWhenExistPhoneData = new FakeData<UserResponse>(UserCenarios.InsertUserErrorWhenExistPhone);                        
         }
 
-        [Test]
+        [Test]        
         public async Task Should_InsertUser_WhenDataIsCorrect()
         {
-            UserDTO user1DTO = new UserDTO("your_password", "your_email@example.com", "123-456-7890", "your_nickname", "User");
+            _insertUserResponseData.IgnoreProperty(x => x.UserDTO.Id);
+            UserRequest userRequest = MountUser.MountInsertUserSuccessRequest();
 
-            var request = await _requestProcessor.ClientRequestAsync(user1DTO);                        
-            var user = JsonConvert.DeserializeObject<InsertUserResponse>(request)!;
+            var request = await _requestProcessor.ClientRequestAsync(userRequest);                        
+            var user = JsonConvert.DeserializeObject<UserResponse>(request)!;
 
             Assert.True(_insertUserResponseData.ExpectedObject(user));
         }
-        //[Test]
-        //public async Task Should_ThrowException_WhenInsertingUserWithExistingEmail()
-        //{
-        //    UserDTO user1DTO = new UserDTO("senha123", "user2@email.com", "1234567891", "User1");
-        //    UserDTO user2DTO = new UserDTO("outraSenha456", "user2@email.com", "987654321", "User2");
-            
-        //    var client = new HttpClient { BaseAddress = new Uri("https://localhost:7049") };
-        //    await client.PostAsJsonAsync("/api/User", user1DTO);
+        [Test]
+        public async Task Should_ThrowException_WhenInsertingUserWithExistingEmail()
+        {
+            _insertUserResponseInsertUserErrorWhenExistEmailData.IgnoreProperty(x => x.UserDTO);
+            List<UserRequest> userRequests = MountUser.MountInsertUserErrorWhenExistEmailRequest();
+            await _requestProcessor.ClientRequestAsync(userRequests.First());
 
-        //    var postResponse2User = await client.PostAsJsonAsync("/api/User", user2DTO);
-        //    var responseString = await postResponse2User.Content.ReadAsStringAsync();
-        //    var user = JsonConvert.DeserializeObject<InsertUserErrorResponse>(responseString)!;
-           
-        //    Assert.That(_insertUserErrorExistinEmailResponseData.ExpectedObject(user));
-        //}
+            string error = await _requestProcessor.ClientRequestAsync(userRequests.Skip(FirstItemInList).First());
+            UserResponse user = JsonConvert.DeserializeObject<UserResponse>(error)!;
 
-        //[Test]
-        //public async Task Should_ThrowException_WhenInsertingUserWithExistingPhoneNumber()
-        //{
-        //    UserDTO user1DTO = new UserDTO("senha123", "user3@email.com", "9876543212", "User1");
-        //    UserDTO user2DTO = new UserDTO("outraSenha456", "user5@email.com", "9876543212", "User2");
+            Assert.True(_insertUserResponseInsertUserErrorWhenExistEmailData.ExpectedObject(user));
+        }
+        [Test]
+        public async Task Should_ThrowException_WhenInsertingUserWithExistingPhoneNumber()
+        {
+            _insertUserResponseInsertUserErrorWhenExistPhoneData.IgnoreProperty(x => x.UserDTO);
+            List<UserRequest> userRequests = MountUser.MountInsertUserErrorWhenExistEmailRequest();
+            await _requestProcessor.ClientRequestAsync(userRequests[0]);
 
-        //    var client = new HttpClient { BaseAddress = new Uri("https://localhost:7049") };
-        //    await client.PostAsJsonAsync("/api/User", user1DTO);
-        //    var postResponse2User = await client.PostAsJsonAsync("/api/User", user2DTO);
-        //    var responseString = await postResponse2User.Content.ReadAsStringAsync();
-        //    var user = JsonConvert.DeserializeObject<InsertUserErrorResponse>(responseString)!;
+            string error = await _requestProcessor.ClientRequestAsync(userRequests[1]);
+            UserResponse user = JsonConvert.DeserializeObject<UserResponse>(error)!;
 
-        //    Assert.That(_insertUserErrorExistingPhoneResponseData.ExpectedObject(user));
-        //}
+            Assert.True(_insertUserResponseInsertUserErrorWhenExistEmailData.ExpectedObject(user));
+        }
     }
 }

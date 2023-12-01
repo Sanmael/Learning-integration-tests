@@ -1,9 +1,0 @@
-﻿{
-	"message": "Usuario Cadastrado com sucesso!",
-	"userDTO": {
-		"password": "your_password",
-		"email": "your_email@example.com",
-		"phone": "123-456-7890",
-		"nickName": "your_nickname"
-	}
-}
