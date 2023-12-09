@@ -23,10 +23,12 @@ namespace UserIntegrationTests
             _insertUserResponseInsertUserErrorWhenExistEmailData = new FakeData<UserResponse>(UserCenarios.InsertUserErrorWhenExistEmail);
             _insertUserResponseInsertUserErrorWhenExistPhoneData = new FakeData<UserResponse>(UserCenarios.InsertUserErrorWhenExistPhone);                        
         }
-
+        
         [Test]        
         public async Task Should_InsertUser_WhenDataIsCorrect()
         {
+            string a = "teste";
+
             _insertUserResponseData.IgnoreProperty(x => x.UserDTO.Id);
             UserRequest userRequest = MountUser.MountInsertUserSuccessRequest();
 
